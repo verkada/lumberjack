@@ -34,7 +34,7 @@ Code:
 ```go
 log.SetOutput(&lumberjack.Logger{
     Filename:   "/var/log/myapp/foo.log",
-    MaxSize:    500, // megabytes
+    MaxSizeKB:    500, // kilobytes
     MaxBackups: 3,
     MaxAge:     28, //days
     Compress:   true, // disabled by default
@@ -51,9 +51,9 @@ type Logger struct {
     // os.TempDir() if empty.
     Filename string `json:"filename" yaml:"filename"`
 
-    // MaxSize is the maximum size in megabytes of the log file before it gets
-    // rotated. It defaults to 100 megabytes.
-    MaxSize int `json:"maxsize" yaml:"maxsize"`
+    // MaxSizeKB is the maximum size in kilobytes of the log file before it gets
+    // rotated. It defaults to 100 kilobytes.
+    MaxSizeKB int `json:"maxsize" yaml:"maxsize"`
 
     // MaxAge is the maximum number of days to retain old log files based on the
     // timestamp encoded in their filename.  Note that a day is defined as 24
@@ -81,13 +81,13 @@ type Logger struct {
 Logger is an io.WriteCloser that writes to the specified filename.
 
 Logger opens or creates the logfile on first Write.  If the file exists and
-is less than MaxSize megabytes, lumberjack will open and append to that file.
-If the file exists and its size is >= MaxSize megabytes, the file is renamed
+is less than MaxSizeKB kilobytes, lumberjack will open and append to that file.
+If the file exists and its size is >= MaxSizeKB kilobytes, the file is renamed
 by putting the current time in a timestamp in the name immediately before the
 file's extension (or the end of the filename if there's no extension). A new
 log file is then created using original filename.
 
-Whenever a write would cause the current log file exceed MaxSize megabytes,
+Whenever a write would cause the current log file exceed MaxSizeKB kilobytes,
 the current file is closed, renamed, and a new log file created with the
 original name. Thus, the filename you give Logger is always the "current" log
 file.
@@ -163,9 +163,9 @@ go func() {
 func (l *Logger) Write(p []byte) (n int, err error)
 ```
 Write implements io.Writer.  If a write would cause the log file to be larger
-than MaxSize, the file is closed, renamed to include a timestamp of the
+than MaxSizeKB, the file is closed, renamed to include a timestamp of the
 current time, and a new log file is created using the original log file name.
-If the length of the write is greater than MaxSize, an error is returned.
+If the length of the write is greater than MaxSizeKB, an error is returned.
 
 
 
